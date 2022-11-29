@@ -2,10 +2,10 @@
 pragma solidity 0.6.12;
 
 import "bsc-library/contracts/BEP20.sol";
-import "./CakeToken.sol";
+import "./KaizenToken.sol";
 
-// SyrupBar with Governance.
-contract SyrupBar is BEP20("SyrupBar Token", "SYRUP") {
+// KaizenBar with Governance.
+contract KaizenBar is BEP20("KaizenBar Token", "XKZEN") {
     /// @dev Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
@@ -17,20 +17,20 @@ contract SyrupBar is BEP20("SyrupBar Token", "SYRUP") {
         _moveDelegates(_delegates[_from], address(0), _amount);
     }
 
-    // The CAKE TOKEN!
-    CakeToken public cake;
+    // The KZEN TOKEN!
+    KaizenToken public kzen;
 
-    constructor(CakeToken _cake) public {
-        cake = _cake;
+    constructor(KaizenToken _kzen) public {
+        kzen = _kzen;
     }
 
-    // Safe cake transfer function, just in case if rounding error causes pool to not have enough CAKEs.
-    function safeCakeTransfer(address _to, uint256 _amount) public onlyOwner {
-        uint256 cakeBal = cake.balanceOf(address(this));
-        if (_amount > cakeBal) {
-            cake.transfer(_to, cakeBal);
+    // Safe kzen transfer function, just in case if rounding error causes pool to not have enough KZENs.
+    function safeKzenTransfer(address _to, uint256 _amount) public onlyOwner {
+        uint256 kzenBal = kzen.balanceOf(address(this));
+        if (_amount > kzenBal) {
+            kzen.transfer(_to, kzenBal);
         } else {
-            cake.transfer(_to, _amount);
+            kzen.transfer(_to, _amount);
         }
     }
 
@@ -114,9 +114,9 @@ contract SyrupBar is BEP20("SyrupBar Token", "SYRUP") {
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
 
         address signatory = ecrecover(digest, v, r, s);
-        require(signatory != address(0), "CAKE::delegateBySig: invalid signature");
-        require(nonce == nonces[signatory]++, "CAKE::delegateBySig: invalid nonce");
-        require(now <= expiry, "CAKE::delegateBySig: signature expired");
+        require(signatory != address(0), "KZEN::delegateBySig: invalid signature");
+        require(nonce == nonces[signatory]++, "KZEN::delegateBySig: invalid nonce");
+        require(now <= expiry, "KZEN::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -138,7 +138,7 @@ contract SyrupBar is BEP20("SyrupBar Token", "SYRUP") {
      * @return The number of votes the account had as of the given block
      */
     function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256) {
-        require(blockNumber < block.number, "CAKE::getPriorVotes: not yet determined");
+        require(blockNumber < block.number, "KZEN::getPriorVotes: not yet determined");
 
         uint32 nCheckpoints = numCheckpoints[account];
         if (nCheckpoints == 0) {
@@ -173,7 +173,7 @@ contract SyrupBar is BEP20("SyrupBar Token", "SYRUP") {
 
     function _delegate(address delegator, address delegatee) internal {
         address currentDelegate = _delegates[delegator];
-        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying CAKEs (not scaled);
+        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying KZENs (not scaled);
         _delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
@@ -211,7 +211,7 @@ contract SyrupBar is BEP20("SyrupBar Token", "SYRUP") {
         uint256 oldVotes,
         uint256 newVotes
     ) internal {
-        uint32 blockNumber = safe32(block.number, "CAKE::_writeCheckpoint: block number exceeds 32 bits");
+        uint32 blockNumber = safe32(block.number, "KZEN::_writeCheckpoint: block number exceeds 32 bits");
 
         if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {
             checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
